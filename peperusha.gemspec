@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.metadata["changelog_uri"] = "https://github.com/sylvance/peperusha"
 
   # dependencies
-  spec.add_dependency "active_support/core_ext/module"
+  spec.add_dependency "activesupport"
   spec.add_dependency "faraday"
   spec.add_dependency "interactor"
   spec.add_dependency "json"

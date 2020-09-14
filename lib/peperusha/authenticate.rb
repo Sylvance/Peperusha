@@ -1,8 +1,8 @@
-
-require 'active_support/core_ext/module'
-require 'faraday'
+require 'active_support'
 require 'interactor'
 require 'json'
+
+require_relative('./client.rb')
 
 module Peperusha
   class Authenticate
@@ -11,39 +11,29 @@ module Peperusha
     delegate :consumer_key, :consumer_secret, to: :context
 
     before do
-      @client_errors = []
-      context.fail!(errors: ['consumer_key.missing']) if consumer_key.size < 1
+      missing_params_errors = check_if_params_missing
+      context.fail!(errors: missing_params_errors) if missing_params_errors.size > 0
     end
 
     def call
-      response = invoke_request
-      populate_errors_collection(response)
-      context.fail!(errors: @client_errors) if @client_errors.size < 0
+      response = Peperusha::Client.invoke_token_request(consumer_key, consumer_secret)
 
       if response.status == 200
         data = JSON.parse(response.body)
-        context.expires_in = data['expires_in']
-        context.token = data['access_token']
         context.body = data
+      else
+        client_errors = Peperusha::Client.build_errors_collection(response)
+        context.fail!(errors: client_errors)
       end
     end
 
     private
 
-    def invoke_request
-      conn = Faraday.new(url: 'https://sandbox.safaricom.co.ke')
-      conn.basic_auth(consumer_key, consumer_secret)
-
-      conn.get('oauth/v1/generate') do |req|
-        req.params['grant_type'] = 'client_credentials'
-      end
-    end
-
-    def populate_errors_collection(response)
-        @client_errors << 'timed.out' if response.status == 304
-        @client_errors << 'server.not.found' if response.status == 400
-        @client_errors << 'server.error' if response.status == 500
-        @client_errors << 'client.not.authorized' if response.status == 501
+    def check_if_params_missing
+      errors = []
+      errors << 'consumer_key.missing' if consumer_key.nil?
+      errors << 'consumer_secret.missing' if consumer_secret.nil?
+      errors
     end
   end
 end

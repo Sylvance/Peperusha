@@ -20,73 +20,71 @@ Or install it yourself as:
 
 ## Usage
 ### Intro
-    NOTE: All the result below will reponsd to these;
-    - ```
-        result.success? # either true or false
-        result.errors # an array of strings describing the errors
-    ```
+`N/B`: All the result below will respond to these;
+```ruby
+result.success? # either true or false
+result.errors # an array of strings describing the errors, default is []
+result.body # {body: body} if success otherwise {} 
+```
 
-    To use `peperusha` first set the client credentials with:
-    - ```
-        result = Peperusha::SetCredentials.call(
-            token: token,
-            secret: secret
-        )
-        result.token # returns the token to be used henceforth
-    ```
-
-### Setting callback urls
-    For customer to business send money do:
-    - ```
-    Peperusha::SetCallbackUrls.call(
-        token: token,
-        callback1: callback1,
-        callback2: callback2,
-        callback3: callback3,
-        callback4: callback4
-    )
-    ```
+To use `peperusha` first get the client token:
+```ruby
+result = Peperusha::Authenticate.call(
+    consumer_key: consumer_key,
+    consumer_secret: consumer_secret
+)
+result.body # returns the body
+result.body['access_token'] # the token to be used henceforth
+result.body['expires_in'] # the time, in seconds, the token takes to expire
+```
 
 ### Sending
-    For customer to business send money do:
-    - ```
-    Peperusha::CustomerToBusiness.call(
-        token: token,
-        amount: amount,
-        customer_phone_number: customer_phone_number,
-        business_till_number: business_till_number
-    )
-    ```
+We can find the test credentials for these here `https://developer.safaricom.co.ke/test_credentials`
 
-    For business to customer send money do:
-    - ```
-    Peperusha::BusinessToCustomer.call(
-        token: token,
-        amount: amount,
-        customer_phone_number: customer_phone_number,
-        business_till_number: business_till_number
-    )
-    ```
+For customer to business send money do:
+```ruby
+result = Peperusha::CustomerToBusiness.call(
+    token: token,
+    amount: amount,
+    customer_phone_number: customer_phone_number,
+    business_till_number: business_till_number
+)
+```
+
+For business to customer send money do:
+```ruby
+result = Peperusha::BusinessToCustomer.call(
+    amount: amount, # e.g 70
+    business_number: business_number, # e.g 123454
+    customer_number: customer_number, # e.g 254790123456
+    initiator_name: initiator_name, # e.g John_Doe
+    remarks: remarks,
+    result_url: result_url, # url where to send notification upon processing of the payment request. 
+    security_credential: security_credential, # e.g 32SzVdmCvjpmQfw3X2RK8UAv7xuhh304dXxFC5+3lslkk2TDJY/Lh6ESVwtqMxJzF7qA==
+    timeout_url: timeout_url, # url where to send notification incase the payment request is timed out while awaiting processing in the queue.
+    token: token # e.g 254790123456
+)
+```
 
 ### Receiving
-    For business to make customer phone get request to send money do:
-    - ```
-    Peperusha::LipaNaMpesa.call(
-        token: token,
-        amount: amount,
-        customer_phone_number: customer_phone_number,
-        business_till_number: business_till_number
-    )
-    ```
+For business to make customer phone get request to send money do:
+```ruby
+result = Peperusha::LipaNaMpesa.call(
+    token: token,
+    amount: amount,
+    customer_phone_number: customer_phone_number,
+    business_till_number: business_till_number
+)
+```
 
 ### Inquiry
-    For customer to business send money do:
-    - ```
-    Peperusha::TransactionInquiry.call(
-        token: token,
-        transaction_code: transaction_code
-    )
-    ```
+For customer to business send money do:
+```ruby
+result = Peperusha::TransactionInquiry.call(
+    token: token,
+    transaction_code: transaction_code
+)
+```
 
 ## Development
 

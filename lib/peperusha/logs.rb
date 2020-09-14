@@ -1,9 +1,9 @@
 require 'logger'
 
 module Peperusha
-  class Logger
+  class Logs
         
-    def initialize app
+    def initialize(app)
       @app = app
       @logger = Logger.new(STDOUT)
     end

@@ -1,4 +1,5 @@
-require "peperusha/version"
+require 'peperusha/version'
+require 'peperusha/authenticate'
 
 module Peperusha
   class Error < StandardError; end

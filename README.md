@@ -33,22 +33,47 @@ result = Peperusha::Authenticate.call(
     consumer_key: consumer_key,
     consumer_secret: consumer_secret
 )
-result.body # returns the body
+result.body # returns the response body
 result.body['access_token'] # the token to be used henceforth
 result.body['expires_in'] # the time, in seconds, the token takes to expire
 ```
 
-### Sending
+### Register urls
+To ensure that customer to business calls work, you will have to register the callback urls:
+```ruby
+result = Peperusha::C2bRegisterUrls.call(
+    token: token,
+    business_number: business_number,
+    confirmation_url: confirmation_url,
+    validation_url: validation_url
+)
+result.body # returns the response body
+```
+
+### Payments
 We can find the test credentials for these here `https://developer.safaricom.co.ke/test_credentials`
 
-For customer to business send money do:
+For customer to business send money via paybill do:
 ```ruby
-result = Peperusha::CustomerToBusiness.call(
+result = Peperusha::CustomerPayViaPaybill.call(
+    token: token,
+    account_number: account_number,
+    amount: amount,
+    customer_number: customer_number,
+    business_paybill_number: business_paybill_number
+)
+result.body # returns the response body
+```
+
+For customer to business send money via till do:
+```ruby
+result = Peperusha::CustomerPayViaTill.call(
     token: token,
     amount: amount,
-    customer_phone_number: customer_phone_number,
+    customer_number: customer_number,
     business_till_number: business_till_number
 )
+result.body # returns the response body
 ```
 
 For business to customer send money do:
@@ -62,27 +87,71 @@ result = Peperusha::BusinessToCustomer.call(
     result_url: result_url, # url where to send notification upon processing of the payment request. 
     security_credential: security_credential, # e.g 32SzVdmCvjpmQfw3X2RK8UAv7xuhh304dXxFC5+3lslkk2TDJY/Lh6ESVwtqMxJzF7qA==
     timeout_url: timeout_url, # url where to send notification incase the payment request is timed out while awaiting processing in the queue.
-    token: token # e.g 254790123456
+    token: token # the access token
 )
+result.body # returns the response body
 ```
 
-### Receiving
-For business to make customer phone get request to send money do:
+For business till to another business till number do:
 ```ruby
-result = Peperusha::LipaNaMpesa.call(
-    token: token,
-    amount: amount,
-    customer_phone_number: customer_phone_number,
-    business_till_number: business_till_number
+result = Peperusha::BusinessToTill.call(
+    amount: amount, # e.g 70
+    business_number1: business_number1, # e.g 123321
+    business_number2: business_number2, # e.g 123456 should be a till number receiving the funds
+    initiator_name: initiator_name, # e.g Business 1
+    remarks: remarks,
+    result_url: result_url, # url where to send notification upon processing of the payment request. 
+    security_credential: security_credential, # e.g 32SzVdmCvjpmQfw3X2RK8UAv7xuhh304dXxFC5+3lslkk2TDJY/Lh6ESVwtqMxJzF7qA==
+    timeout_url: timeout_url, # url where to send notification incase the payment request is timed out while awaiting processing in the queue.
+    token: token # the access token
 )
+result.body # returns the response body
+```
+
+For business paybill to another business paybill number do:
+```ruby
+result = Peperusha::BusinessToPaybill.call(
+    account_reference: account_reference, # e.g 123 the account value under the paybill
+    amount: amount, # e.g 70
+    business_number1: business_number1, # e.g 123321
+    business_number2: business_number2, # e.g 123456 should be a paybill number receiving the funds
+    initiator_name: initiator_name, # e.g Business 1
+    remarks: remarks,
+    result_url: result_url, # url where to send notification upon processing of the payment request. 
+    security_credential: security_credential, # e.g 32SzVdmCvjpmQfw3X2RK8UAv7xuhh304dXxFC5+3lslkk2TDJY/Lh6ESVwtqMxJzF7qA==
+    timeout_url: timeout_url, # url where to send notification incase the payment request is timed out while awaiting processing in the queue.
+    token: token # the access token
+)
+result.body # returns the response body
 ```
 
 ### Inquiry
-For customer to business send money do:
+To check the status of a B2C and C2B APIs transactions:
 ```ruby
 result = Peperusha::TransactionInquiry.call(
     token: token,
-    transaction_code: transaction_code
+    initiator_name: initiator_name,
+    receiving_number: receiving_number,
+    remarks: remarks,
+    result_url: result_url,
+    security_credential: security_credential,
+    timeout_url: timeout_url,
+    transaction_id: transaction_id
+)
+```
+
+### Reversal
+To reverse a B2C APIs transactions:
+```ruby
+result = Peperusha::TransactionReversal.call(
+    token: token,
+    initiator_name: initiator_name,
+    receiving_number: receiving_number,
+    remarks: remarks,
+    result_url: result_url,
+    security_credential: security_credential,
+    timeout_url: timeout_url,
+    transaction_id: transaction_id,
 )
 ```
 
